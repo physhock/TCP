@@ -1,4 +1,7 @@
 #include "unp.h"
+#include "unpthread.h"
+#include <pthread.h>
+
 
 int Socket(int family, int type, int protocol)
 {
@@ -44,4 +47,26 @@ void Close(int fd)
 {
     if (close(fd) == -1)
         err_sys("close error");
+}
+
+
+void Pthread_detach(pthread_t tid)
+{
+    int		n;
+
+    if ( (n = pthread_detach(tid)) == 0)
+        return;
+    errno = n;
+    err_sys("pthread_detach error");
+}
+
+void Pthread_create(pthread_t *tid, const pthread_attr_t *attr,
+               void * (*func)(void *), void *arg)
+{
+    int		n;
+
+    if ( (n = pthread_create(tid, attr, func, arg)) == 0)
+        return;
+    errno = n;
+    err_sys("pthread_create error");
 }

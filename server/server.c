@@ -1,8 +1,12 @@
-#include    "unp.h"
+#include    "unpthread.h"
+
+
+static void *doit(void *);
 
 int main(int argc, char **argv)
 {
     int		listenfd, connfd;
+    pthread_t   tid;
     pid_t	childpid;
     socklen_t			clilen;
     struct sockaddr_in	cliaddr, servaddr;
@@ -21,12 +25,14 @@ int main(int argc, char **argv)
     for ( ; ; ) {
         clilen = sizeof(cliaddr);
         connfd = Accept(listenfd, (SA *) &cliaddr, &clilen);
-
-        if ( (childpid = fork()) == 0) {	/* child process */
-            Close(listenfd);	/* close listening socket */
-            str_echo(connfd);	/* process the request */
-            exit(0);
-        }
-        Close(connfd);			/* parent closes connected socket */
+        Pthread_create(&tid, NULL, &doit, (void * ) connfd );
     }
+}
+
+static void * doit(void *arg){
+
+    Pthread_detach(pthread_self());
+    str_echo((int)arg);
+    Close((int)arg);
+    return (NULL);
 }

@@ -1,16 +1,16 @@
 #include	"unp.h"
 
-void
-str_echo(int sockfd)
+void *str_echo(void *arg)
 {
 	ssize_t		n;
 	char		command[MAXLINE];
+	char		result[MAXLINE] = "HI\n";
 
 	for ( ; ; ) {
-		if ( (n = Readline(sockfd, command, MAXLINE)) == 0)
-			return;		/* connection closed by other end */
-		if ((n = strcmp(command,"hi")) == 0)
-			Write(sockfd,command, n);
+		if ( (n = Readline((int)arg, command, MAXLINE)) == 0)
+			return NULL;		/* connection closed by other end */
+		fputs(command,stdout);
+
 
 	}
 }

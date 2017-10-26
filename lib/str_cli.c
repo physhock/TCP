@@ -7,11 +7,11 @@ str_cli(FILE *fp, int sockfd)
 
 	while (fgets(sendline, MAXLINE, fp) != NULL) {
 
-		Writen(sockfd, sendline, strlen(sendline));
+		send(sockfd, sendline, strlen(sendline), NULL);
 
-		if (Readline(sockfd, recvline, MAXLINE) == 0)
-			err_quit("str_cli: server terminated prematurely");
-
-		fputs(recvline, stdout);
+//		if (Readline(sockfd, recvline, MAXLINE) == 0)
+//			err_quit("str_cli: server terminated prematurely");
+//
+//		fputs(recvline, stdout);
 	}
 }

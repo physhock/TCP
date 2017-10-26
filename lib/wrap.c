@@ -1,6 +1,4 @@
 #include "unp.h"
-#include "unpthread.h"
-#include <pthread.h>
 
 
 int Socket(int family, int type, int protocol)

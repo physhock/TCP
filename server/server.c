@@ -3,12 +3,13 @@
 
 static void *doit(void *);
 
-
 int main(int argc, char **argv)
 {
     int		              listenfd;
+    char                    cmnd [128];
     pthread_t                      tid;
     struct sockaddr_in	      servaddr;
+
 
     listenfd = socket(AF_INET, SOCK_STREAM, 0);
 
@@ -32,9 +33,11 @@ int main(int argc, char **argv)
     }
 
 
-
-
 }
+
+
+
+
 
 static void * doit(void *arg){
 
@@ -44,7 +47,7 @@ static void * doit(void *arg){
         struct sockaddr_in cliadr;
         pthread_t tid;
         client *newConnection = malloc(sizeof(client));
-        map *clientBase = malloc(sizeof(map));
+        //map *clientBase = malloc(sizeof(map));
 
         clilen=sizeof(cliadr);
 
@@ -57,12 +60,11 @@ static void * doit(void *arg){
         newConnection->active = true;
         newConnection->thread = tid;
         pthread_detach(pthread_self());
-        pthread_create(&tid, NULL, &str_echo, (void *) connfd);
+        pthread_create(&tid, NULL, &str_echo, (void *) newConnection);
 
-        clientBase->id = 1;
-        clientBase->n = newConnection;
+        //map.pushback(newConnection)
 
-        printf("New client connected: %s%d\n",inet_ntoa(newConnection->addr.sin_addr), ntohs(newConnection->addr.sin_port));
+        printf("New client connected: %s:%d\n",inet_ntoa(newConnection->addr.sin_addr), ntohs(newConnection->addr.sin_port));
     }
 //    Pthread_detach(pthread_self());
 //    str_echo((int)arg);

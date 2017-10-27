@@ -45,7 +45,7 @@ typedef struct map_of_clients {
     client *n;
 } map;
 
-
+ssize_t readn(int , void *, size_t );
 ssize_t readline(int, void *, size_t);
 void *str_echo(void *arg);
 void str_cli(FILE *, int);
@@ -56,7 +56,7 @@ void Bind(int, const SA *, socklen_t);
 void Listen(int, int);
 ssize_t Readline(int, void *, size_t);
 int Socket(int, int, int);
-
+int get_id();
 
 void err_dump(const char *, ...);
 void err_msg(const char *, ...);

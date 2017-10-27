@@ -16,11 +16,14 @@ void *str_echo(void *arg) {
             return NULL;                /* connection closed by other end */
         //fputs(command, stdout);
         fprintf(stdout,"id: %lu %s",handlingClient->thread,command);
+
         if(strcmp(command,"disconnect\n") == 0) {
+
             handlingClient->active = false;
-            shutdown(handlingClient->sock, 2);
+            shutdown(handlingClient->sock, 2);  //MB in one func
             close(handlingClient->sock);
-            return 0;
+
+            return NULL;
         }
 
     }

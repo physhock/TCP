@@ -33,19 +33,10 @@
 #define        MAXCLIENTS             90
 
 
-typedef struct Client_ {
-    int id;
-    int sock;
-    struct sockaddr_in addr;
-    bool active;
-    pthread_t thread;
-} client;
-typedef struct map_of_clients {
-    int id;
-    client *n;
-} map;
 
-ssize_t readn(int , void *, size_t );
+extern pthread_t clients[MAXCLIENTS][2];
+extern int clientsCount;
+
 ssize_t readline(int, void *, size_t);
 void *str_echo(void *arg);
 void str_cli(FILE *, int);

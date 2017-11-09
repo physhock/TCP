@@ -4,27 +4,21 @@
 //handleClient
 void *str_echo(void *arg) {
 
-    ssize_t n;
+    size_t n;
     char command[MAXLINE];
-    char result[MAXLINE];
-    client *handlingClient = (client*) arg;
-
-
 
     for (;;) {
-        if ((n = Readline(handlingClient->sock, command, MAXLINE)) == 0)
+        if ((n = Readline((int) arg, command, MAXLINE)) == 0)
             return NULL;                /* connection closed by other end */
-        //fputs(command, stdout);
-        fprintf(stdout,"id: %lu %s",handlingClient->thread,command);
 
         if(strcmp(command,"disconnect\n") == 0) {
 
-            handlingClient->active = false;
-            shutdown(handlingClient->sock, 2);  //MB in one func
-            close(handlingClient->sock);
-
+            shutdown((int) arg, 2);
+            close((int) arg);
             return NULL;
         }
+
+        write((int) arg, &command, n);
 
     }
 }

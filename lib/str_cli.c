@@ -9,9 +9,9 @@ str_cli(FILE *fp, int sockfd)
 
 		send(sockfd, sendline, strlen(sendline), NULL);
 
-//		if (Readline(sockfd, recvline, MAXLINE) == 0)
-//			err_quit("str_cli: server terminated prematurely");
-//
-//		fputs(recvline, stdout);
+		if (Readline(sockfd, recvline, MAXLINE) == 0)
+			err_quit("str_cli: server terminated prematurely");
+
+		fputs(recvline, stdout);
 	}
 }

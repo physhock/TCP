@@ -3,7 +3,7 @@
 
 static ssize_t my_read(int fd, char *ptr)
 {
-	static int	read_cnt = 0;
+	static ssize_t	read_cnt = 0;
 	static char	*read_ptr;
 	static char	read_buf[MAXLINE];
 
@@ -25,7 +25,7 @@ again:
 
 ssize_t readline(int fd, void *vptr, size_t maxlen)
 {
-	int		n, rc;
+	ssize_t		n, rc;
 	char	c, *ptr;
 
 	ptr = vptr;

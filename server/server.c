@@ -1,15 +1,22 @@
 #include    "unp.h"
 
 
+int  clientsCount = 0;
+pthread_t  clients [MAXCLIENTS][2];
+
 static void *doit(void *);
+void showClients();
+void killCli(pthread_t);
+void killall();
+void shutdownServ(int);
+
 
 int main(int argc, char **argv)
 {
     int		              listenfd;
-    char                    cmnd [128];
+    char                     cmnd[128];
     pthread_t                      tid;
     struct sockaddr_in	      servaddr;
-
 
     listenfd = socket(AF_INET, SOCK_STREAM, 0);
 
@@ -22,21 +29,45 @@ int main(int argc, char **argv)
 
     Listen(listenfd, LISTENQ);
 
-    //Start main thread
+
     pthread_create(&tid, NULL, &doit, (void * ) listenfd );
+
 
     printf("Server started on port: %d\n",SERV_PORT);
 
-    //getline()
+
     for( ; ; ) {
+
+        scanf("%s", cmnd);
+
+        if(strcmp(cmnd, "list") == 0){ showClients();}
+        else if(strcmp(cmnd, "killCli") == 0){
+
+            printf("id:");
+            scanf("%lu", &tid);
+            killCli(tid);
+        }
+        else if(strcmp(cmnd, "killall") == 0){ killall();}
+        else if(strcmp(cmnd, "shutdown") == 0){
+//            close(listenfd);
+//            pthread_join(tid,NULL);
+            //shutdownServ(listenfd);
+            break;
+        }
 
     }
 
 
+    close(listenfd);
+//    if (clientsCount > 0) {
+//        for (int i = 1; i <= clientsCount; ++i) {
+//            pthread_join(clients[i][1], NULL);
+//        }
+//    }
+//    pthread_cancel(tid);
+    pthread_join(tid, NULL);
+    exit(1);
 }
-
-
-
 
 
 static void * doit(void *arg){
@@ -45,29 +76,84 @@ static void * doit(void *arg){
         int connfd;
         socklen_t clilen;
         struct sockaddr_in cliadr;
-        pthread_t tid;
-        client *newConnection = malloc(sizeof(client));
-        //map *clientBase = malloc(sizeof(map));
-
         clilen=sizeof(cliadr);
 
+        if ((connfd = accept((int) arg, (SA *) &cliadr, &clilen)) < 0){ break;};
 
-        connfd = Accept((int) arg, (SA *) &cliadr, &clilen);
+        clientsCount++;
 
-        newConnection->id = 2;
-        newConnection->sock = connfd;
-        newConnection->addr = cliadr;
-        newConnection->active = true;
-        newConnection->thread = tid;
-        pthread_detach(pthread_self());
-        pthread_create(&tid, NULL, &str_echo, (void *) newConnection);
+        clients[clientsCount][0] = connfd;
 
-        //map.pushback(newConnection)
+        pthread_create(&clients[clientsCount][1], NULL, &str_echo, (void *) clients[clientsCount][0]);
 
-        printf("New client connected: %s:%d\n",inet_ntoa(newConnection->addr.sin_addr), ntohs(newConnection->addr.sin_port));
+        printf("New connection id: %lu  address: %s:%d\n",clients[clientsCount][1], inet_ntoa(cliadr.sin_addr), ntohs(cliadr.sin_port));
     }
-//    Pthread_detach(pthread_self());
-//    str_echo((int)arg);
-//    Close((int)arg);
-//    return (NULL);
+//
+//    if (clientsCount > 0) {
+//        for (int i = 1; i <= clientsCount; ++i) {
+//            pthread_join(clients[i][1], NULL);
+//        }
+//    }
+//
+//    return NULL;
 }
+
+void showClients(){
+
+    printf("Number of clients: %d\n", clientsCount);
+    if (clientsCount > 0) {
+        for (int i = 1; i <= clientsCount; ++i) {
+            printf("id: %lu\n", clients[i][1]);
+        }
+    }
+
+}
+
+void killCli(pthread_t id){
+
+
+    for (int i = 1; i <= clientsCount; ++i) {
+        if (clients[i][1] == id){
+
+            shutdown(clients[i][0], 2);
+            close(clients[i][0]);
+
+            for (int j = i; j < clientsCount; ++j) {
+                for (int k = 0; k < 2 ; ++k) {
+                    clients[j][k] = clients[j+1][k];
+                }
+            }
+
+            clientsCount--;
+            return;
+        }
+    }
+
+    printf("Client not found");
+
+}
+
+void killall(){
+
+    int j;
+    j = clientsCount;
+    for (int i = 1; i <= j; ++i) {
+        killCli(clients[1][1]);
+    }
+
+}
+
+/*void shutdownServ(int fd) {
+
+    close(fd);
+    if (clientsCount > 0) {
+        for (int i = 1; i <= clientsCount; ++i) {
+            pthread_join(clients[i][1], NULL);
+        }
+    }
+
+    printf("Server currently offline");
+
+
+}
+ */

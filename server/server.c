@@ -62,6 +62,7 @@ int main(int argc, char **argv)
 static void * doit(void *arg){
 
     while(true) {
+
         int connfd;
         socklen_t clilen;
         struct sockaddr_in cliadr;

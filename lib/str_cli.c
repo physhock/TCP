@@ -1,7 +1,6 @@
 #include	"unp.h"
 
-void
-str_cli(FILE *fp, int sockfd)
+void str_cli(FILE *fp, int sockfd)
 {
 	char	sendline[MAXLINE], recvline[MAXLINE];
 
@@ -10,7 +9,7 @@ str_cli(FILE *fp, int sockfd)
 		send(sockfd, sendline, strlen(sendline), NULL);
 
 		if (Readline(sockfd, recvline, MAXLINE) == 0)
-			err_quit("str_cli: server terminated prematurely");
+			err_quit("\nServer terminated prematurely");
 
 		fputs(recvline, stdout);
 	}

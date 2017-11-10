@@ -1,8 +1,13 @@
 #include    "unp.h"
 
 
+//1.2.18 Система оповещения о событиях и подписки на них
+//
+//
+//
 int  clientsCount = 0;
 pthread_t  clients [MAXCLIENTS][2];
+pthread_mutex_t clnts;
 
 static void *doit(void *);
 void showClients();
@@ -68,11 +73,12 @@ static void * doit(void *arg){
         struct sockaddr_in cliadr;
         clilen=sizeof(cliadr);
 
-        connfd = Accept((int) arg, (SA *) &cliadr, &clilen);
+        if((connfd = accept((int) arg, (SA *) &cliadr, &clilen)) <= 0){ break;};
 
+        pthread_mutex_lock(&clnts);
         clientsCount++;
-
         clients[clientsCount][0] = connfd;
+        pthread_mutex_unlock(&clnts);
 
         pthread_create(&clients[clientsCount][1], NULL, &str_echo, (void *) clients[clientsCount][0]);
 
@@ -101,13 +107,18 @@ void killCli(pthread_t id){
             shutdown(clients[i][0], 2);
             close(clients[i][0]);
 
+
             for (int j = i; j < clientsCount; ++j) {
                 for (int k = 0; k < 2 ; ++k) {
+                    pthread_mutex_lock(&clnts);
                     clients[j][k] = clients[j+1][k];
+                    pthread_mutex_unlock(&clnts);
                 }
             }
 
+            pthread_mutex_lock(&clnts);
             clientsCount--;
+            pthread_mutex_unlock(&clnts);
             return;
         }
     }
@@ -128,7 +139,10 @@ void killall(){
 
 void shutdownServ(int fd, pthread_t tid) {
 
+    shutdown(fd, 2);
     close(fd);
+
+    killall();
 
     if (clientsCount > 0) {
         for (int i = 1; i <= clientsCount; ++i) {
@@ -136,8 +150,8 @@ void shutdownServ(int fd, pthread_t tid) {
         }
     }
 
-    printf("Server currently offline\n");
-    pthread_cancel(tid);
+    printf("\nServer currently offline\n");
+
     pthread_join(tid, NULL);
 
 }
